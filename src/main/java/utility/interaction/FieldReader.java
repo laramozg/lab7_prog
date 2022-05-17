@@ -45,6 +45,7 @@ public abstract class FieldReader {
 
     public Float salaryValidation() {
         String salaryLine = getInputValue();
+        killIfValueIsNull(salaryLine);
         Float salary = null;
         if (!salaryLine.isEmpty()) {
             salary = Float.parseFloat(salaryLine);
@@ -56,12 +57,16 @@ public abstract class FieldReader {
     }
 
     public Date startDateValidation() {
-        SimpleDateFormat formatForDateNow = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat formatForDateNow = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         String date = getInputValue();
         killIfValueIsNull(date);
         Date startDate;
         try {
+            formatForDateNow.setLenient(false);
             startDate = formatForDateNow.parse(date);
+            if (startDate.after(new Date())){
+                throw new IncorrectArgumentException("Такой даты не существует!");
+            }
         }catch (ParseException e) {
             throw new IncorrectArgumentException("Введите дату в правильном формате!");}
         return startDate;

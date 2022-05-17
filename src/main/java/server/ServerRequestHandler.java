@@ -7,63 +7,47 @@ import utility.exceptions.*;
 import utility.interaction.Command;
 
 import java.sql.SQLException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ServerRequestHandler {
-    private Logger log = LoggerFactory.getLogger(MainServer.class);
-    private InteractionServer server;
-    private ActionInvoker invoker;
-    private UserDatabase userData;
+    ExecutorService pool = Executors.newCachedThreadPool();
+    ExecutorService pool1 = Executors.newCachedThreadPool();
+    ExecutorService pool2 = Executors.newCachedThreadPool();
 
     public ServerRequestHandler() throws SQLException {
-        this.server = InteractionServer.getInstance();
-        this.invoker = ActionInvoker.getInstance();
-        this.userData = UserDatabase.getInstance();
-        userData.createTableIfNotExist();
+        UserDatabase.getInstance().createTableIfNotExist();
     }
 
-    public void handle() throws SQLException {
-        Answer answer;
-        Request request = server.getRequest();
+    public void handle() {
+    InteractionServer server = new InteractionServer();
+    Request request = server.getRequest();
+    pool.execute(()-> {
+        try {
+            server.sendAnswer(getAnswer(request));
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    });
+    }
+
+    private Answer getAnswer(Request request) throws SQLException {
+        RequestHandlerStrategy answerHandler = null;
         switch (request.getRequestType()) {
             case COMMAND_EXECUTION:
-                UserDatabase.getInstance().checkUserPassword(request.getUserData());
-                Command command = request.getCommand();
-                log.info("Обработка команды: " + command.getName());
-                try {
-                    invoker.setCurrentUser(request.getUserData());
-                    answer = invoker.execute(command);
-                } catch (IncorrectCommandException | IncorrectArgumentException | MissingElementException |
-                         DatabaseElementError e) {
-                    answer = new Answer(AnswerType.RETURN_ACTION, e.getMessage());
-                    log.error("Команда " + command.getName() + " не выполнена. Ошибка: " + e.getMessage() + " Аргумент: " + command.getParameter());
-                } catch (IllegalArgumentException e) {
-                    answer = new Answer(AnswerType.RETURN_ACTION, "Аргумент команды некорректен!");
-                    log.error("Аргумент команды " + command.getName() + " некорректен. Введено: " + command.getParameter());
-                }
-                if (answer.getType().toString().equals("EXIT")) {
-                    log.debug("Клиентское приложение завершено. Коллекция сохранена");
-                }
-                server.sendAnswer(answer);
+                answerHandler = new CommandExecuteStrategy();
                 break;
             case REGISTRATION_REQUEST:
-                log.debug("Регистрация пользователя: " + request.getUserData().getLogin());
-                try {
-                    userData.insertElement(request.getUserData());
-                    server.sendAnswer(new Answer(AnswerType.SUCCESSFULLY_AUTHORIZATION, ""));
-                } catch (DatabaseElementError e) {
-                    server.sendAnswer(new Answer(AnswerType.UNSUCCESSFULLY_AUTHORIZATION, e.getMessage()));
-                }
+                answerHandler = new RegistrationStrategy();
                 break;
-            case AUTORIZATION_REQUEST:
-                log.debug("Авторизация пользователя: " + request.getUserData().getLogin());
-                try {
-                    userData.checkUserPassword(request.getUserData());
-                    server.sendAnswer(new Answer(AnswerType.SUCCESSFULLY_AUTHORIZATION, ""));
-                } catch (DatabaseElementError e) {
-                    server.sendAnswer(new Answer(AnswerType.UNSUCCESSFULLY_AUTHORIZATION, e.getMessage()));
-                }
+            case AUTHORIZATION_REQUEST:
+                answerHandler = new AuthorizationStrategy();
+                break;
         }
+        return answerHandler.handle(request);
     }
 }

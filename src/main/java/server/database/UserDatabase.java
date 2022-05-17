@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.*;
+import java.util.Objects;
 import java.util.Random;
 
 public class UserDatabase {
@@ -47,6 +48,9 @@ public class UserDatabase {
     }
 
     public void insertElement(UserData userData) throws SQLException {
+        if ((Objects.equals(userData.getLogin().trim(), "") || (Objects.equals(userData.getPassword().trim(), "")))){
+            throw new DatabaseElementError("Не может быть null");
+        }
         if (checkUserData(userData)) {
             throw new DatabaseElementError("Данный логин занят!");
         }
@@ -69,9 +73,13 @@ public class UserDatabase {
     private boolean checkUserData(UserData userData) throws SQLException {
         PreparedStatement statement = connection.prepareStatement(SELECT_VALUE);
         statement.setString(1, userData.getLogin());
+        if (Objects.equals(userData.getLogin(), "")){
+            throw new DatabaseElementError("Данный логин недопустим!");
+        }
         ResultSet result = statement.executeQuery();
         result.next();
         return result.getInt(1) != 0;
+
     }
 
 

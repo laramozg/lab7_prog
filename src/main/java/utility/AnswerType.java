@@ -3,8 +3,8 @@ package utility;
 import java.io.Serializable;
 
 public enum AnswerType implements Serializable {
-    SUCCESSFULLY_AUTHORIZATION,
-    UNSUCCESSFULLY_AUTHORIZATION,
+    SUCCESSFULLY,
+    UNSUCCESSFULLY,
     NEED_ELEMENT,
     RETURN_ACTION,
     GETTER_STATE,

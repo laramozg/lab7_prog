@@ -25,7 +25,7 @@ public class RegistrationState implements InteractionStrategy {
         Request request = new Request(RequestType.REGISTRATION_REQUEST);
         client.sendRequest(request);
         Answer answer=client.getAnswer();
-        if (answer.getType()== AnswerType.SUCCESSFULLY_AUTHORIZATION){
+        if (answer.getType()== AnswerType.SUCCESSFULLY){
             return new StateConfiguration("Вы успешно зарегистрировались. Введите help для просмотра возможных команд!",new DialogStrategy());
         }
         else{

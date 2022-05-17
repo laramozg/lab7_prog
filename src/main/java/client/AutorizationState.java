@@ -22,10 +22,10 @@ public class AutorizationState implements InteractionStrategy{
         }
         UserData userData = new UserData(login, password);
         client.setUserData(userData);
-        Request request = new Request(RequestType.AUTORIZATION_REQUEST);
+        Request request = new Request(RequestType.AUTHORIZATION_REQUEST);
         client.sendRequest(request);
         Answer answer=client.getAnswer();
-        if (answer.getType()== AnswerType.SUCCESSFULLY_AUTHORIZATION){
+        if (answer.getType()== AnswerType.SUCCESSFULLY){
             return new StateConfiguration("Вы успешно авторизовались. Введите help для просмотра возможных команд!",new DialogStrategy());
         }
         else{

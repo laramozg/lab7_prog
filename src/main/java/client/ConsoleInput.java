@@ -22,7 +22,7 @@ public class ConsoleInput extends Input {
         Coordinates coordinates = reader.coordinatesReadEvent();
         System.out.println("Введите зарплату работника:");
         Float salary = reader.salaryReadEvent();
-        System.out.println("Введите дату:");
+        System.out.println("Введите дату в формате год/месяц/день час:минута:секунда");
         Date startDate = reader.startDateReadEvent();
         System.out.println("Введите должность (HUMAN_RESOURCES, HEAD_OF_DIVISION, DEVELOPER):");
         Position position = reader.positionReadEvent();

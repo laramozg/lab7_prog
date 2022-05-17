@@ -9,26 +9,19 @@ import java.net.*;
 import java.nio.ByteBuffer;
 
 public class InteractionServer {
-    private static InteractionServer interactionServer = null;
     private InetAddress address;
     private int port;
-    private DatagramSocket socket;
-    private static final int BUFFER_SIZE = 4096;
+    private static final DatagramSocket socket;
 
-    private InteractionServer() {
+    static {
         try {
-            this.socket = new DatagramSocket(new InetSocketAddress(3001));
+            socket = new DatagramSocket(new InetSocketAddress(3001));
         } catch (SocketException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
-    public static InteractionServer getInstance() {
-        if (interactionServer == null) {
-            interactionServer = new InteractionServer();
-        }
-        return interactionServer;
-    }
+    private static final int BUFFER_SIZE = 4096;
 
     public Request getRequest() {
         Request request = null;

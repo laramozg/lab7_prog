@@ -28,10 +28,6 @@ public class ExecuteScript extends BinaryAction {
     private ActionInvoker invoker = ActionInvoker.getInstance();
 
 
-    public ExecuteScript() {
-        this.server = InteractionServer.getInstance();
-    }
-
     @Override
     public Answer execute() {
         setParametersOnStart();
