@@ -100,16 +100,19 @@ public class Worker implements Serializable {
 
     @Override
     public String toString() {
-        return  "[id=" + id +
-                ", name='" + name + '\'' +
-                ", coordinates=" + coordinates +
-                ", creationDate=" + creationDate +
-                ", salary=" + salary +
-                ", startDate=" + startDate +
-                ", position=" + position +
-                ", status=" + status +
-                ", organization=" + organization +
-                ']';
+        return  key+
+                "," + id +
+                "," + name +
+                "," + coordinates.getX() +
+                "," + coordinates.getY() +
+                "," + creationDate +
+                "," + salary +
+                "," + startDate +
+                "," + position +
+                "," + status +
+                "," + organization.getEmployeesCount() +
+                "," + organization.getType() +
+                "," + organization.getPostalAddress();
     }
     public String getKey() {
         return key;

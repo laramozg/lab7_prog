@@ -5,8 +5,9 @@ import utility.Answer;
 import utility.element.Worker;
 import utility.exceptions.IncorrectArgumentException;
 
-public class Update extends BinaryAction {
+import java.util.concurrent.locks.ReentrantLock;
 
+public class Update extends BinaryAction {
     @Override
     public Answer execute() {
         int id = getId();

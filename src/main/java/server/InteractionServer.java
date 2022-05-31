@@ -15,7 +15,7 @@ public class InteractionServer {
 
     static {
         try {
-            socket = new DatagramSocket(new InetSocketAddress(3001));
+            socket = new DatagramSocket(new InetSocketAddress(3011));
         } catch (SocketException e) {
             throw new RuntimeException(e);
         }

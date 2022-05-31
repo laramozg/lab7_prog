@@ -27,7 +27,6 @@ public class ExecuteScript extends BinaryAction {
     private Hashtable<String,Worker> collectionReserveCopy;
     private ActionInvoker invoker = ActionInvoker.getInstance();
 
-
     @Override
     public Answer execute() {
         setParametersOnStart();
@@ -42,7 +41,9 @@ public class ExecuteScript extends BinaryAction {
             errorMessage = openFiles.pop() + ": Аргумент некорректен" + "\nНе выполнено!";
         }
         if (openFiles.size() == 0) {
-            rollbackEventsIfError();
+            if (!errorMessage.equals("")) {
+                manager.updateCollection(collectionReserveCopy);
+            }
             return new Answer(AnswerType.DIALOG_STATE, errorMessage);
         }
         return notifyAboutResult("");
@@ -68,13 +69,15 @@ public class ExecuteScript extends BinaryAction {
         Input fileReader = getFileScriptReader(cursorFileName);
         while (fileReader.hasNext()) {
             try {
-                errorChecking();
+                if (!errorMessage.equals("")) {
+                    throw new ExecuteScriptException("Произошла ошибка во время исполнения скрипта!");
+                }
             } catch (ExecuteScriptException e) {
                 break;
             }
             Command command = fileReader.readCommand();
             Answer answer = invoker.execute(command);
-            if (isNeedAnElement(answer)) {
+            if (answer.getType().toString().equals("NEED_ELEMENT")) {
                 Worker newElement = fileReader.readElement();
                 command.setElement(newElement);
                 answer = invoker.execute(command);
@@ -100,20 +103,5 @@ public class ExecuteScript extends BinaryAction {
         return new FileInput(new Scanner(file));
     }
 
-    private void errorChecking() {
-        if (!errorMessage.equals("")) {
-            throw new ExecuteScriptException("Произошла ошибка во время исполнения скрипта!");
-        }
-    }
-
-    private boolean isNeedAnElement(Answer answer) {
-        return answer.getType().toString().equals("NEED_ELEMENT");
-    }
-
-    private void rollbackEventsIfError() {
-        if (!errorMessage.equals("")) {
-            manager.updateCollection(collectionReserveCopy);
-        }
-    }
 
 }

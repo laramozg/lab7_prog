@@ -5,7 +5,7 @@ import utility.exceptions.ExitException;
 
 public class MainClient {
     public static void main(String[] args) {
-        InteractionClient client = new InteractionClient("localhost", 3001);
+        InteractionClient client = new InteractionClient("localhost", 3011);
         ConsoleReader reader = new ConsoleReader();
         InteractionManager manager = new InteractionManager(client, reader);
         System.out.println("Вы зарегистрированы?(Y/N)");

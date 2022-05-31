@@ -8,6 +8,9 @@ import utility.element.Worker;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Класс для работы с коллекцией(исполнение команд)
@@ -24,6 +27,7 @@ public class CollectionManager {
 
     private Hashtable<String, Worker> collection = new Hashtable<>();
 
+    ReentrantLock lock = new ReentrantLock();
     /**
      * Файл, который обрабатывается на данный момент
      */
@@ -78,12 +82,12 @@ public class CollectionManager {
      * Показать элементы коллекции
      */
     public String show() {
-        StringBuilder st = new StringBuilder();
         if (collection.size() != 0) {
-            collection.forEach((key, value) -> st.append(key).append("-").append(value).append("\n"));
-            return st.toString();
+            Stream<Worker> stream =collection.values().stream();
+            return stream.map(Worker::toString).collect(Collectors.joining("\n"));
+        } else {
+            return  "Коллекция пуста";
         }
-        return "Коллекция пуста.";
     }
 
     /**
@@ -103,11 +107,12 @@ public class CollectionManager {
      * @param id      ID добавляемого элемента
      */
     public void update(int id, Worker element) {
+        lock.lock();
         String key = getKeyById(id);
         element.setId(id);
         element.setCreationDate(LocalDate.now().toString());
         collection.put(key, element);
-
+        lock.unlock();
     }
 
     /**
@@ -135,13 +140,14 @@ public class CollectionManager {
      * @param worker Введённый элемент
      */
     public void removeGreater(Worker worker) {
+        lock.lock();
         Enumeration<String> key = collection.keys();
         while (key.hasMoreElements()) {
             String k = key.nextElement();
             if (collection.get(k).getOrganization().getEmployeesCount() > worker.getOrganization().getEmployeesCount()) {
                 collection.remove(k);
             }
-        }
+        }lock.unlock();
     }
 
     /**
@@ -178,12 +184,13 @@ public class CollectionManager {
      * @param startDate Введённый климат
      */
     public String countByStartDate(Date startDate) {
+        lock.lock();
         int count = 0;
         for (Worker p : collection.values()) {
             if (p.getStartDate().equals(startDate)) {
                 count++;
             }
-        }
+        }lock.unlock();
         return String.valueOf(count);
     }
 
@@ -193,6 +200,7 @@ public class CollectionManager {
      * @param position Введённый уровень воды
      */
     public String filterGreaterThanPosition(Position position) {
+        lock.lock();
         int count = 0;
         StringBuilder list = new StringBuilder();
         Enumeration<String> key = collection.keys();
@@ -204,7 +212,7 @@ public class CollectionManager {
                     list.append(collection.get(k)).append("\n");
                 }
             }
-        }
+        }lock.unlock();
         if (count == 0) {
             return "Подходящих элементов нет!";
         }
@@ -223,12 +231,14 @@ public class CollectionManager {
      * Вывести поле климата всех элементов коллекции
      */
     public String printFieldDescendingStartDate() {
+        lock.lock();
         List<Date> date = new LinkedList<>();
         for (Worker worker : collection.values()) {
             date.add(worker.getStartDate());
         }
         Comparator<Date> comparator = Comparator.comparing(Date::getTime).reversed();
         date.sort(comparator);
+        lock.unlock();
         return date.toString();
     }
 
@@ -250,18 +260,6 @@ public class CollectionManager {
         }
         return null;
     }
-
-
-//    private int newId() {
-//        for (int i = 0; i < collection.size(); i++) {
-//            for (Worker w : collection.values()) {
-//                if (w.getId() == id) {
-//                    id++;
-//                }
-//            }
-//        }
-//        return id;
-//    }
 
     /**
      * Заменить коллекцию

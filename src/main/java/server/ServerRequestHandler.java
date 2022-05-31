@@ -1,23 +1,13 @@
 package server;
 
 import utility.*;
-import server.commands.ActionInvoker;
 import server.database.UserDatabase;
-import utility.exceptions.*;
-import utility.interaction.Command;
-
 import java.sql.SQLException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ForkJoinPool;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ServerRequestHandler {
     ExecutorService pool = Executors.newCachedThreadPool();
-    ExecutorService pool1 = Executors.newCachedThreadPool();
-    ExecutorService pool2 = Executors.newCachedThreadPool();
 
     public ServerRequestHandler() throws SQLException {
         UserDatabase.getInstance().createTableIfNotExist();
